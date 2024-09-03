@@ -2,7 +2,7 @@ package com.example.microservicio_tecnologia.infrastructure.config;
 
 import com.example.microservicio_tecnologia.domain.api.ITechnologyServicePort;
 import com.example.microservicio_tecnologia.domain.spi.ITechnologyPersistencePort;
-import com.example.microservicio_tecnologia.domain.useCase.TechhnologyUseCase;
+import com.example.microservicio_tecnologia.domain.useCase.TechnologyUseCase;
 import com.example.microservicio_tecnologia.infrastructure.mapper.ITechnologyEntityMapper;
 import com.example.microservicio_tecnologia.infrastructure.out.adapter.TechnologyReactiveCrudAdapter;
 import com.example.microservicio_tecnologia.infrastructure.out.repository.ITechnologyRepository;
@@ -24,7 +24,7 @@ public class BeanConfiguration {
 
     @Bean
     public ITechnologyServicePort technologyServicePort(ITechnologyPersistencePort technologyPersistencePort) {
-        return new TechhnologyUseCase(technologyPersistencePort);
+        return new TechnologyUseCase(technologyPersistencePort);
     }
 
 }

@@ -7,10 +7,12 @@ import com.example.microservicio_tecnologia.infrastructure.out.entity.Technology
 import com.example.microservicio_tecnologia.infrastructure.out.repository.ITechnologyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 @Service
 @Slf4j
@@ -27,8 +29,11 @@ public class TechnologyReactiveCrudAdapter implements ITechnologyPersistencePort
     }
 
     @Override
-    public List<TechnologyModel> getAllTechnologies() {
-        return List.of();
+    public Flux<TechnologyModel> getAllTechnologies(int page, int size, String sortDirection) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "name"));
+
+        return technologyEntityMapper.toModel(technologyRepository.findAllBy(pageable));
     }
 
     @Override

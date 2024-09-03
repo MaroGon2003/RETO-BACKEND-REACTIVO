@@ -4,15 +4,15 @@ import com.example.microservicio_tecnologia.domain.api.ITechnologyServicePort;
 import com.example.microservicio_tecnologia.domain.exception.InvalidInputException;
 import com.example.microservicio_tecnologia.domain.model.TechnologyModel;
 import com.example.microservicio_tecnologia.domain.spi.ITechnologyPersistencePort;
+import com.example.microservicio_tecnologia.domain.util.DomainConstants;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
-public class TechhnologyUseCase implements ITechnologyServicePort {
+public class TechnologyUseCase implements ITechnologyServicePort {
 
     private final ITechnologyPersistencePort technologyPersistencePort;
 
-    public TechhnologyUseCase(ITechnologyPersistencePort technologyPersistencePort) {
+    public TechnologyUseCase(ITechnologyPersistencePort technologyPersistencePort) {
         this.technologyPersistencePort = technologyPersistencePort;
     }
 
@@ -20,15 +20,15 @@ public class TechhnologyUseCase implements ITechnologyServicePort {
     public void saveTechnology(TechnologyModel technology) {
 
         if(Boolean.TRUE.equals(existTechnologyByName(technology.getName()).block())){
-            throw new InvalidInputException("Technology already exists");
+            throw new InvalidInputException(DomainConstants.TECHNOLOGY_ALREADY_EXISTS);
         }
 
         if(technology.getName().length() > 50){
-            throw new InvalidInputException("Technology name is too long (max 50 characters)");
+            throw new InvalidInputException(DomainConstants.TECHNOLOGY_NAME_TOO_LONG);
         }
 
         if (technology.getDescription().length() > 90){
-            throw new InvalidInputException("Technology description is too long (max 90 characters)");
+            throw new InvalidInputException(DomainConstants.TECHNOLOGY_DESCRIPTION_TOO_LONG);
         }
 
         technologyPersistencePort.saveTechnology(technology);
@@ -36,8 +36,8 @@ public class TechhnologyUseCase implements ITechnologyServicePort {
     }
 
     @Override
-    public List<TechnologyModel> getAllTechnologies() {
-        return List.of();
+    public Flux<TechnologyModel> getAllTechnologies(int page, int size, String sortDirection) {
+        return technologyPersistencePort.getAllTechnologies(page, size, sortDirection);
     }
 
     @Override

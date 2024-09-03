@@ -1,14 +1,14 @@
 package com.example.microservicio_tecnologia.infrastructure.input.rest;
 
 import com.example.microservicio_tecnologia.application.dto.request.TechnologyRequestDto;
+import com.example.microservicio_tecnologia.application.dto.response.TechnologyResponseDto;
 import com.example.microservicio_tecnologia.application.handler.ITechnologyHandler;
+import com.example.microservicio_tecnologia.infrastructure.InfrastructureConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -22,7 +22,14 @@ public class TechnologyRestController {
     @PostMapping
     public Mono<String> save(@RequestBody TechnologyRequestDto technologyRequestDto) {
         technologyHandler.saveTechnology(technologyRequestDto);
-        return Mono.just("Technology saved");
+        return Mono.just(InfrastructureConstants.TECHNOLOGY_CREATED);
+    }
+
+    @GetMapping
+    public Flux<TechnologyResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "10") int size,
+                                              @RequestParam(defaultValue = "asc") String sortDirection) {
+        return technologyHandler.getAllTechnologies(page, size, sortDirection);
     }
 
 }
