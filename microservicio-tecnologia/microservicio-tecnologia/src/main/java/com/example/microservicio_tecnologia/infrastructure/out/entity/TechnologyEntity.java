@@ -10,19 +10,11 @@ import org.springframework.data.relational.core.mapping.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class TecnologiaEntity {
+public class TechnologyEntity {
 
     @Id
     private Long id;
-    private String nombre;
-    private String descripcion;
+    private String name;
+    private String description;
 
-    @Override
-    public String toString() {
-        return "TecnologiaEntity{" +
-                "descripcion='" + descripcion + '\'' +
-                ", id=" + id +
-                ", nombre='" + nombre + '\'' +
-                '}';
-    }
 }
