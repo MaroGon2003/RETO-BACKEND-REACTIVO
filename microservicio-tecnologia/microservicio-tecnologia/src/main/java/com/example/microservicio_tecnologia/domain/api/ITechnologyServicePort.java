@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 
 public interface ITechnologyServicePort {
 
-    void saveTechnology(TechnologyModel technology);
+    Mono<Void> saveTechnology(TechnologyModel technology);
 
     Flux<TechnologyModel> getAllTechnologies(int page, int size, String sortDirection);
 

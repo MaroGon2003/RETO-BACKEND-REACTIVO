@@ -4,8 +4,6 @@ import com.example.microservicio_tecnologia.domain.model.TechnologyModel;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 public interface ITechnologyPersistencePort {
 
     void saveTechnology(TechnologyModel technology);

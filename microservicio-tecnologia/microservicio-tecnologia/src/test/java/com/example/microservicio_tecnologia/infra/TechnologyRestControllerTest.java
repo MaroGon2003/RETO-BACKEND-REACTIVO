@@ -9,9 +9,6 @@ import com.example.microservicio_tecnologia.infrastructure.InfrastructureConstan
 import com.example.microservicio_tecnologia.infrastructure.input.rest.TechnologyRestController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @WebFluxTest(controllers = TechnologyRestController.class)
-public class TechnologyRestControllerTest {
+class TechnologyRestControllerTest {
 
     @Autowired
     private WebTestClient webTestClient;
@@ -48,15 +45,19 @@ public class TechnologyRestControllerTest {
 
     @Test
     void testSaveTechnology() {
-        doNothing().when(technologyHandler).saveTechnology(any(TechnologyRequestDto.class));
+        // Simular que el método saveTechnology devuelve un Mono vacío (Mono<Void>)
+        when(technologyHandler.saveTechnology(any(TechnologyRequestDto.class)))
+                .thenReturn(Mono.empty());
 
+        // Realizar la solicitud POST y verificar la respuesta
         webTestClient.post()
                 .uri("/tecnologia")
                 .bodyValue(technologyRequestDto)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()  // Verificar que el código de estado es 201 Created
                 .expectBody(String.class).isEqualTo(InfrastructureConstants.TECHNOLOGY_CREATED);
 
+        // Verificar que el método saveTechnology del handler fue invocado
         verify(technologyHandler).saveTechnology(any(TechnologyRequestDto.class));
     }
 

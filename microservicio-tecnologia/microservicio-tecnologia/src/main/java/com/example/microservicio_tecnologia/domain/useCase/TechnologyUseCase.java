@@ -17,23 +17,28 @@ public class TechnologyUseCase implements ITechnologyServicePort {
     }
 
     @Override
-    public void saveTechnology(TechnologyModel technology) {
+    public Mono<Void> saveTechnology(TechnologyModel technology) {
+        return existTechnologyByName(technology.getName())
+                .flatMap(exist -> {
+                    if (Boolean.TRUE.equals(exist)) {
+                        return Mono.error(new InvalidInputException(DomainConstants.TECHNOLOGY_ALREADY_EXISTS));
+                    }
+                    return Mono.empty();
+                })
+                .then(Mono.defer(() -> {
+                    if (technology.getName().length() > 50) {
+                        return Mono.error(new InvalidInputException(DomainConstants.TECHNOLOGY_NAME_TOO_LONG));
+                    }
 
-        if(Boolean.TRUE.equals(existTechnologyByName(technology.getName()).block())){
-            throw new InvalidInputException(DomainConstants.TECHNOLOGY_ALREADY_EXISTS);
-        }
+                    if (technology.getDescription().length() > 90) {
+                        return Mono.error(new InvalidInputException(DomainConstants.TECHNOLOGY_DESCRIPTION_TOO_LONG));
+                    }
 
-        if(technology.getName().length() > 50){
-            throw new InvalidInputException(DomainConstants.TECHNOLOGY_NAME_TOO_LONG);
-        }
-
-        if (technology.getDescription().length() > 90){
-            throw new InvalidInputException(DomainConstants.TECHNOLOGY_DESCRIPTION_TOO_LONG);
-        }
-
-        technologyPersistencePort.saveTechnology(technology);
-
+                    // Ejecutar el guardado de manera reactiva, sin bloquear el flujo.
+                    return Mono.fromRunnable(() -> technologyPersistencePort.saveTechnology(technology));
+                }));
     }
+
 
     @Override
     public Flux<TechnologyModel> getAllTechnologies(int page, int size, String sortDirection) {

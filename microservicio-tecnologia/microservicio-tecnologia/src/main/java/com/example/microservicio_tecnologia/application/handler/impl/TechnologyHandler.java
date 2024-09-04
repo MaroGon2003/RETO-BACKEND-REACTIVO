@@ -9,8 +9,7 @@ import com.example.microservicio_tecnologia.domain.api.ITechnologyServicePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-
-import java.util.List;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -21,10 +20,8 @@ public class TechnologyHandler implements ITechnologyHandler {
     private final ITechnologyResponseMapper technologyResponseMapper;
 
     @Override
-    public void saveTechnology(TechnologyRequestDto technology) {
-
-        technologyServicePort.saveTechnology(technologyRequestMapper.toTechnologyModel(technology));
-
+    public Mono<Void> saveTechnology(TechnologyRequestDto technology) {
+        return technologyServicePort.saveTechnology(technologyRequestMapper.toTechnologyModel(technology));
     }
 
     @Override

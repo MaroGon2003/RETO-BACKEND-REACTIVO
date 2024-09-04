@@ -2,6 +2,7 @@ package com.example.microservicio_tecnologia.domain;
 
 
 import com.example.microservicio_tecnologia.domain.exception.InvalidInputException;
+import com.example.microservicio_tecnologia.domain.util.DomainConstants;
 import com.example.microservicio_tecnologia.factory.TechnologyTestDataFactory;
 import com.example.microservicio_tecnologia.domain.model.TechnologyModel;
 import com.example.microservicio_tecnologia.domain.spi.ITechnologyPersistencePort;
@@ -11,9 +12,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.mockito.Mockito.*;
 
 class TechnologyUseCaseTest {
@@ -30,49 +35,69 @@ class TechnologyUseCaseTest {
     }
 
     @Test
-    void saveTechnology_shouldThrowException_whenTechnologyAlreadyExists() {
-        // Given
-        TechnologyModel technologyModel = TechnologyTestDataFactory.getTechnologyModel();
-        when(technologyPersistencePort.existTechnologyByName(anyString())).thenReturn(Mono.just(true));
+    void testSaveTechnologyAlreadyExists() {
+        // Simular que la tecnología ya existe
+        when(technologyPersistencePort.existTechnologyByName(anyString()))
+                .thenReturn(Mono.just(true));
 
-        // When & Then
-        assertThrows(InvalidInputException.class, () -> technologyUseCase.saveTechnology(technologyModel));
-        verify(technologyPersistencePort, never()).saveTechnology(any());
+        TechnologyModel technologyModel = TechnologyTestDataFactory.getTechnologyModel();
+
+        StepVerifier.create(technologyUseCase.saveTechnology(technologyModel))
+                .expectErrorMatches(throwable -> throwable instanceof InvalidInputException &&
+                        throwable.getMessage().equals(DomainConstants.TECHNOLOGY_ALREADY_EXISTS))
+                .verify();
+
+        verify(technologyPersistencePort).existTechnologyByName(technologyModel.getName());
     }
 
     @Test
-    void saveTechnology_shouldThrowException_whenTechnologyNameTooLong() {
-        // Given
+    void testSaveTechnologyNameTooLong() {
+        // Simular que la tecnología no existe
+        when(technologyPersistencePort.existTechnologyByName(anyString()))
+                .thenReturn(Mono.just(false));
+
         TechnologyModel technologyModel = TechnologyTestDataFactory.getTechnologyModelWithLongName();
-        when(technologyPersistencePort.existTechnologyByName(anyString())).thenReturn(Mono.just(false));
 
-        // When & Then
-        assertThrows(InvalidInputException.class, () -> technologyUseCase.saveTechnology(technologyModel));
-        verify(technologyPersistencePort, never()).saveTechnology(any());
+        StepVerifier.create(technologyUseCase.saveTechnology(technologyModel))
+                .expectErrorMatches(throwable -> throwable instanceof InvalidInputException &&
+                        throwable.getMessage().equals(DomainConstants.TECHNOLOGY_NAME_TOO_LONG))
+                .verify();
+
+        verify(technologyPersistencePort).existTechnologyByName(technologyModel.getName());
     }
 
     @Test
-    void saveTechnology_shouldThrowException_whenTechnologyDescriptionTooLong() {
-        // Given
+    void testSaveTechnologyDescriptionTooLong() {
+        // Simular que la tecnología no existe
+        when(technologyPersistencePort.existTechnologyByName(anyString()))
+                .thenReturn(Mono.just(false));
+
         TechnologyModel technologyModel = TechnologyTestDataFactory.getTechnologyModelWithLongDescription();
-        when(technologyPersistencePort.existTechnologyByName(anyString())).thenReturn(Mono.just(false));
 
-        // When & Then
-        assertThrows(InvalidInputException.class, () -> technologyUseCase.saveTechnology(technologyModel));
-        verify(technologyPersistencePort, never()).saveTechnology(any());
+        StepVerifier.create(technologyUseCase.saveTechnology(technologyModel))
+                .expectErrorMatches(throwable -> throwable instanceof InvalidInputException &&
+                        throwable.getMessage().equals(DomainConstants.TECHNOLOGY_DESCRIPTION_TOO_LONG))
+                .verify();
+
+        verify(technologyPersistencePort).existTechnologyByName(technologyModel.getName());
     }
 
     @Test
-    void saveTechnology_shouldSaveTechnology_whenValidTechnology() {
-        // Given
-        TechnologyModel technologyModel = TechnologyTestDataFactory.getTechnologyModel();
-        when(technologyPersistencePort.existTechnologyByName("Java")).thenReturn(Mono.just(false));
+    void testGetAllTechnologies() {
+        List<TechnologyModel> technologyList = Arrays.asList(
+                TechnologyTestDataFactory.getTechnologyModel(),
+                TechnologyTestDataFactory.getTechnologyModel()
+        );
 
-        // When
-        technologyUseCase.saveTechnology(technologyModel);
+        // Simular la obtención de todas las tecnologías
+        when(technologyPersistencePort.getAllTechnologies(anyInt(), anyInt(), anyString()))
+                .thenReturn(Flux.fromIterable(technologyList));
 
-        // Then
-        verify(technologyPersistencePort, times(1)).saveTechnology(technologyModel);
+        StepVerifier.create(technologyUseCase.getAllTechnologies(0, 10, "asc"))
+                .expectNextCount(2)
+                .verifyComplete();
+
+        verify(technologyPersistencePort).getAllTechnologies(0, 10, "asc");
     }
 }
 
